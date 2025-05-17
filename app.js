@@ -144,9 +144,25 @@ async function checkAuthStatus() {
     const code = new URLSearchParams(window.location.search).get('code');
     if (code) {
         try {
-            // 注意：在实际应用中，这里应该通过后端服务器来交换访问令牌
-            // 为了演示，我们假设已经获得了令牌
-            authToken = 'demo_token';
+            const response = await fetch(`https://github.com/login/oauth/access_token`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    client_id: config.client_id,
+                    client_secret: 'YOUR_CLIENT_SECRET',
+                    code: code
+                })
+            });
+            
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error_description);
+            }
+            
+            authToken = data.access_token;
             localStorage.setItem('github_token', authToken);
             window.history.replaceState({}, document.title, window.location.pathname);
             updateAuthUI(true);
@@ -156,6 +172,40 @@ async function checkAuthStatus() {
         }
     } else if (authToken) {
         updateAuthUI(true);
+    }
+}
+
+// 获取项目数据
+async function fetchWithAuth(url) {
+    try {
+        const response = await fetch(url, {
+            headers: authToken ? {
+                'Authorization': `Bearer ${authToken}`,
+                'Accept': 'application/vnd.github.v3+json'
+            } : {}
+        });
+
+        if (response.status === 401) {
+            authToken = null;
+            localStorage.removeItem('github_token');
+            updateAuthUI(false);
+            throw new Error('Invalid authentication');
+        }
+
+        if (response.status === 403) {
+            const resetTime = response.headers.get('x-ratelimit-reset');
+            const errorMsg = translations[currentLanguage].rateLimitError;
+            if (resetTime) {
+                const resetDate = new Date(resetTime * 1000);
+                return showError(`${errorMsg} (Resets at ${resetDate.toLocaleTimeString()})`);
+            }
+            return showError(errorMsg);
+        }
+
+        return response;
+    } catch (error) {
+        console.error('Request failed:', error);
+        throw error;
     }
 }
 

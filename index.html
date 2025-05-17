@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub项目推荐</title>
+    <title>GitHub Project Explorer</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -22,6 +22,80 @@
             margin-bottom: 30px;
         }
 
+        .language-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .language-btn {
+            background: none;
+            border: 1px solid #d1d5da;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .language-btn.active {
+            background-color: #0366d6;
+            color: white;
+            border-color: #0366d6;
+        }
+
+        .auth-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .github-login-btn {
+            background-color: #24292e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .github-login-btn:hover {
+            background-color: #2c974b;
+        }
+
+        .filters {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            background-color: white;
+        }
+
         .refresh-btn {
             background-color: #2ea44f;
             color: white;
@@ -31,6 +105,8 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.2s;
+            width: 100%;
+            margin-top: 10px;
         }
 
         .refresh-btn:hover {
@@ -89,17 +165,101 @@
             margin-top: 30px;
             display: none;
         }
+
+        .user-info {
+            display: none;
+            text-align: right;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .user-info img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .error-message {
+            color: #cb2431;
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .rate-limit-info {
+            text-align: right;
+            font-size: 12px;
+            color: #586069;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>GitHub项目推荐</h1>
-            <button class="refresh-btn" onclick="refreshProjects()">刷新推荐</button>
-        </div>
-        <div class="loading">加载中...</div>
-        <div class="cards-container" id="projectsContainer"></div>
+    <div class="language-switch">
+        <button class="language-btn active" data-lang="en">English</button>
+        <button class="language-btn" data-lang="zh">中文</button>
     </div>
+
+    <div class="container">
+        <div class="auth-section">
+            <button class="github-login-btn" onclick="handleLogin()">
+                <svg height="20" viewBox="0 0 16 16" width="20" fill="white">
+                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+                <span class="login-text">Sign in with GitHub</span>
+            </button>
+        </div>
+
+        <div class="user-info">
+            <span class="rate-limit-info"></span>
+            <img id="userAvatar" src="" alt="User avatar">
+            <span id="userName"></span>
+        </div>
+
+        <div class="header">
+            <h1 class="title">GitHub Project Explorer</h1>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label class="language-label" for="languageSelect">Programming Language:</label>
+                <select id="languageSelect">
+                    <option value="">All Languages</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="stars-label" for="starsSelect">Minimum Stars:</label>
+                <select id="starsSelect">
+                    <option value="100">100+</option>
+                    <option value="1000">1,000+</option>
+                    <option value="5000">5,000+</option>
+                    <option value="10000">10,000+</option>
+                    <option value="50000">50,000+</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="sort-label" for="sortSelect">Sort By:</label>
+                <select id="sortSelect">
+                    <option value="stars">Stars</option>
+                    <option value="updated">Recently Updated</option>
+                    <option value="created">Recently Created</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <button class="refresh-btn" onclick="getRandomProjects()">Refresh</button>
+            </div>
+        </div>
+
+        <div class="error-message"></div>
+        <div class="loading">Loading...</div>
+        <div id="projectsContainer" class="cards-container"></div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 // GitHub OAuth配置
 const config = {
-    client_id: 'your_client_id_here', // 需要替换为实际的GitHub OAuth App client ID
-    redirect_uri: window.location.origin,
+    client_id: 'Ov23lidVEwyOPpzljyVm',
+    redirect_uri: 'https://teddyxiong53.github.io/github-wander',
     scope: 'read:user'
 };
 

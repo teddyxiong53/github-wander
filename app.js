@@ -91,14 +91,11 @@ function populateLanguageSelect() {
 function setupLanguageSwitch() {
     const buttons = document.querySelectorAll('.language-btn');
     buttons.forEach(button => {
-        if (button.dataset.lang === currentLanguage) {
-            button.classList.add('active');
-        }
+        button.classList.toggle('active', button.dataset.lang === currentLanguage);
         button.addEventListener('click', () => {
             currentLanguage = button.dataset.lang;
             localStorage.setItem('preferred_language', currentLanguage);
-            buttons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
+            buttons.forEach(btn => btn.classList.toggle('active', btn.dataset.lang === currentLanguage));
             updateUIText();
         });
     });
@@ -287,7 +284,7 @@ async function getRandomProjects() {
         let url = `https://api.github.com/search/repositories?q=stars:>${filters.stars}`;
         
         if (filters.language) {
-            url += `+language:${filters.language}`;
+            url += `+language:${encodeURIComponent(filters.language)}`;
         }
         
         url += `&sort=${filters.sort}&order=desc&page=${page}&per_page=10`;

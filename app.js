@@ -1,82 +1,97 @@
-// GitHub OAuth配置
 const config = {
     client_id: 'Ov23lidVEwyOPpzljyVm',
-    redirect_uri: 'https://teddyxiong53.github.io/github-wander',
+    redirect_uri: window.location.href.split('?')[0],
     scope: 'read:user'
 };
 
-// 存储用户认证信息和语言设置
 let authToken = localStorage.getItem('github_token');
-let currentLanguage = localStorage.getItem('preferred_language') || 'en';
-
-// 存储已经展示过的项目，避免重复
+let clientSecret = localStorage.getItem('github_client_secret') || '';
 let shownProjects = new Set();
+let currentTheme = localStorage.getItem('theme') || 'light';
 
-// 编程语言列表
 const languages = [
     'JavaScript', 'Python', 'Java', 'Go', 'TypeScript',
-    'Rust', 'C++', 'PHP', 'Ruby', 'Swift', 'Kotlin',
-    'Dart', 'C#', 'Vue', 'React', 'Angular'
+    'Rust', 'C++', 'C', 'C#', 'PHP', 'Ruby', 'Swift', 
+    'Kotlin', 'Dart', 'Scala', 'Haskell', 'Elixir', 
+    'Erlang', 'Lua', 'Perl', 'R', 'MATLAB', 'Julia',
+    'Shell', 'PowerShell', 'Vim script', 'Emacs Lisp',
+    'HTML', 'CSS', 'SCSS', 'Sass', 'Less',
+    'Vue', 'React', 'Angular', 'Svelte', 'Solid',
+    'Node.js', 'Deno', 'Bun', 'NestJS', 'Express',
+    'FastAPI', 'Django', 'Flask', 'Spring', 'Rails',
+    'Laravel', 'WordPress', 'Ghost', 'Hexo', 'Jekyll',
+    'TensorFlow', 'PyTorch', 'Keras', 'OpenCV', 'Pillow',
+    'NumPy', 'Pandas', 'SciPy', 'Matplotlib', 'Plotly',
+    'Unity', 'Unreal', 'Godot', 'Three.js', 'Babylon.js',
+    'React Native', 'Flutter', 'Ionic', 'Cordova', 'Xamarin',
+    'Electron', 'Tauri', 'NW.js', 'Atom', 'VS Code',
+    'Kubernetes', 'Docker', 'Terraform', 'Ansible', 'Puppet',
+    'Prometheus', 'Grafana', 'ELK', 'Redis', 'MongoDB',
+    'PostgreSQL', 'MySQL', 'SQLite', 'MariaDB', 'Oracle',
+    'GraphQL', 'gRPC', 'gRPC-Web', 'Apache Kafka', 'RabbitMQ',
+    'Nginx', 'Apache', 'Caddy', 'Traefik', 'HAProxy',
+    'AWS', 'GCP', 'Azure', 'DigitalOcean', 'Heroku',
+    'Vim', 'Emacs', 'VS Code', 'IntelliJ', 'PyCharm',
+    'WebAssembly', 'Wasm', 'Rust', 'Zig', 'Nim', 'V',
+    'Assembly', 'LLVM', 'GCC', 'Clang', 'CMake',
+    'Make', 'Gradle', 'Maven', 'NPM', 'Yarn',
+    'Pip', 'Cargo', 'Go modules', 'NuGet', 'Composer',
+    'APT', 'DNF', 'Homebrew', 'Chocolatey', 'Scoop',
+    'Git', 'Mercurial', 'SVN', 'Perforce', 'Fossil',
+    'GitHub', 'GitLab', 'Bitbucket', 'Gitea', 'Gogs',
+    'CircleCI', 'Travis CI', 'Jenkins', 'GitHub Actions',
+    'GitLab CI', 'Drone', 'Argo CD', 'Flux', 'Tekton'
 ];
 
-// 多语言支持
 const translations = {
-    en: {
-        title: 'GitHub Project Explorer',
-        refresh: 'Refresh',
-        loading: 'Loading...',
-        noDescription: 'No description available',
-        languageLabel: 'Programming Language:',
-        starsLabel: 'Minimum Stars:',
-        sortLabel: 'Sort By:',
-        allLanguages: 'All Languages',
-        loginButton: 'Sign in with GitHub',
-        logoutButton: 'Sign out',
-        error: 'Failed to fetch projects. Please try again later.',
-        rateLimitError: 'API rate limit exceeded. Please sign in with GitHub to increase the limit.',
+    title: 'GitHub Project Explorer',
+    refresh: 'Refresh',
+    loading: 'Loading...',
+    noDescription: 'No description available',
+    languageLabel: 'Programming Language:',
+    starsLabel: 'Minimum Stars:',
+    sortLabel: 'Sort By:',
+    allLanguages: 'All Languages',
+    loginButton: 'Sign in with GitHub',
+    logoutButton: 'Sign out',
+    loggedInAs: 'Logged in as',
+    error: 'Failed to fetch projects. Please try again later.',
+    rateLimitError: 'API rate limit exceeded. Please sign in with GitHub to increase the limit.',
+    stars: 'Stars',
+    forks: 'Forks',
+    language: 'Language',
+    sortOptions: {
         stars: 'Stars',
-        forks: 'Forks',
-        language: 'Language',
-        sortOptions: {
-            stars: 'Stars',
-            updated: 'Recently Updated',
-            created: 'Recently Created'
-        }
+        updated: 'Recently Updated',
+        created: 'Recently Created'
     },
-    zh: {
-        title: 'GitHub项目推荐',
-        refresh: '刷新推荐',
-        loading: '加载中...',
-        noDescription: '暂无描述',
-        languageLabel: '编程语言：',
-        starsLabel: '最少星标数：',
-        sortLabel: '排序方式：',
-        allLanguages: '所有语言',
-        loginButton: '使用GitHub登录',
-        logoutButton: '退出登录',
-        error: '获取项目失败，请稍后重试',
-        rateLimitError: 'API调用次数已达上限，请登录GitHub以提高限制',
-        stars: '星标',
-        forks: '分支',
-        language: '语言',
-        sortOptions: {
-            stars: '星标数',
-            updated: '最近更新',
-            created: '最近创建'
-        }
-    }
+    clientSecretLabel: 'GitHub OAuth Client Secret (optional):',
+    clientSecretPlaceholder: 'Your OAuth client_secret (increases rate limit)',
+    settingsSaved: 'Settings saved',
+    clearSettings: 'Clear Settings',
+    enterClientSecret: 'Enter your GitHub OAuth client_secret'
 };
 
-// 初始化页面
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function toggleTheme() {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('theme', currentTheme);
+}
+
 function initializePage() {
+    document.documentElement.setAttribute('data-theme', currentTheme);
     populateLanguageSelect();
-    setupLanguageSwitch();
     checkAuthStatus();
     updateUIText();
     getRandomProjects();
 }
 
-// 填充语言选择下拉框
 function populateLanguageSelect() {
     const select = document.getElementById('languageSelect');
     languages.forEach(lang => {
@@ -87,44 +102,34 @@ function populateLanguageSelect() {
     });
 }
 
-// 设置语言切换
-function setupLanguageSwitch() {
-    const buttons = document.querySelectorAll('.language-btn');
-    buttons.forEach(button => {
-        button.classList.toggle('active', button.dataset.lang === currentLanguage);
-        button.addEventListener('click', () => {
-            currentLanguage = button.dataset.lang;
-            localStorage.setItem('preferred_language', currentLanguage);
-            buttons.forEach(btn => btn.classList.toggle('active', btn.dataset.lang === currentLanguage));
-            updateUIText();
-        });
-    });
-}
-
-// 更新UI文本
 function updateUIText() {
-    const texts = translations[currentLanguage];
-    document.querySelector('.title').textContent = texts.title;
-    document.querySelector('.refresh-btn').textContent = texts.refresh;
-    document.querySelector('.loading').textContent = texts.loading;
-    document.querySelector('.language-label').textContent = texts.languageLabel;
-    document.querySelector('.stars-label').textContent = texts.starsLabel;
-    document.querySelector('.sort-label').textContent = texts.sortLabel;
-    document.querySelector('.login-text').textContent = authToken ? texts.logoutButton : texts.loginButton;
+    document.querySelector('.title').textContent = translations.title;
+    document.querySelector('.refresh-btn').textContent = translations.refresh;
+    document.querySelector('.loading').textContent = translations.loading;
+    document.querySelector('.language-label').textContent = translations.languageLabel;
+    document.querySelector('.stars-label').textContent = translations.starsLabel;
+    document.querySelector('.sort-label').textContent = translations.sortLabel;
+    document.querySelector('.login-text').textContent = authToken ? translations.logoutButton : translations.loginButton;
     
     const allLangOption = document.querySelector('#languageSelect option[value=""]');
     if (allLangOption) {
-        allLangOption.textContent = texts.allLanguages;
+        allLangOption.textContent = translations.allLanguages;
     }
 
     const sortSelect = document.getElementById('sortSelect');
     Array.from(sortSelect.options).forEach(option => {
-        option.textContent = texts.sortOptions[option.value];
+        option.textContent = translations.sortOptions[option.value];
     });
 }
 
-// 处理GitHub登录
 function handleLogin() {
+    const clientSecretInput = document.getElementById('clientSecretInput').value.trim();
+    if (clientSecretInput) {
+        clientSecret = clientSecretInput;
+        localStorage.setItem('github_client_secret', clientSecret);
+        showMessage(translations.settingsSaved, 'success');
+    }
+    
     if (authToken) {
         authToken = null;
         localStorage.removeItem('github_token');
@@ -136,11 +141,27 @@ function handleLogin() {
     window.location.href = authUrl;
 }
 
-// 检查认证状态
+function showMessage(message, type = 'error') {
+    const msgEl = document.querySelector('.message');
+    msgEl.textContent = message;
+    msgEl.className = `message ${type}`;
+    msgEl.style.display = 'block';
+    setTimeout(() => {
+        msgEl.style.display = 'none';
+    }, 3000);
+}
+
 async function checkAuthStatus() {
     const code = new URLSearchParams(window.location.search).get('code');
     if (code) {
         try {
+            if (!clientSecret) {
+                showMessage(translations.enterClientSecret, 'info');
+                updateAuthUI(false);
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
+
             const response = await fetch(`https://github.com/login/oauth/access_token`, {
                 method: 'POST',
                 headers: {
@@ -149,7 +170,7 @@ async function checkAuthStatus() {
                 },
                 body: JSON.stringify({
                     client_id: config.client_id,
-                    client_secret: 'YOUR_CLIENT_SECRET',
+                    client_secret: clientSecret,
                     code: code
                 })
             });
@@ -163,113 +184,62 @@ async function checkAuthStatus() {
             localStorage.setItem('github_token', authToken);
             window.history.replaceState({}, document.title, window.location.pathname);
             updateAuthUI(true);
+            getRandomProjects();
         } catch (error) {
             console.error('Failed to exchange code for token:', error);
-            showError(translations[currentLanguage].error);
+            showMessage(translations.error);
         }
     } else if (authToken) {
         updateAuthUI(true);
     }
 }
 
-// 获取项目数据
-async function fetchWithAuth(url) {
-    try {
-        const response = await fetch(url, {
-            headers: authToken ? {
-                'Authorization': `Bearer ${authToken}`,
-                'Accept': 'application/vnd.github.v3+json'
-            } : {}
-        });
-
-        if (response.status === 401) {
-            authToken = null;
-            localStorage.removeItem('github_token');
-            updateAuthUI(false);
-            throw new Error('Invalid authentication');
-        }
-
-        if (response.status === 403) {
-            const resetTime = response.headers.get('x-ratelimit-reset');
-            const errorMsg = translations[currentLanguage].rateLimitError;
-            if (resetTime) {
-                const resetDate = new Date(resetTime * 1000);
-                return showError(`${errorMsg} (Resets at ${resetDate.toLocaleTimeString()})`);
-            }
-            return showError(errorMsg);
-        }
-
-        return response;
-    } catch (error) {
-        console.error('Request failed:', error);
-        throw error;
-    }
-}
-
-// 更新认证UI
 async function updateAuthUI(isAuthenticated) {
-    const authSection = document.querySelector('.auth-section');
-    const userInfo = document.querySelector('.user-info');
     const loginButton = document.querySelector('.github-login-btn');
+    const userInfo = document.querySelector('.user-info');
+    const clientSecretGroup = document.querySelector('.client-secret-group');
+
+    if (clientSecret) {
+        document.getElementById('clientSecretInput').value = clientSecret;
+    }
 
     if (isAuthenticated && authToken) {
         try {
             const response = await fetch('https://api.github.com/user', {
                 headers: {
-                    'Authorization': `token ${authToken}`
+                    'Authorization': `token ${authToken}`,
+                    'Accept': 'application/vnd.github.v3+json'
                 }
             });
             if (response.ok) {
                 const userData = await response.json();
                 document.getElementById('userAvatar').src = userData.avatar_url;
                 document.getElementById('userName').textContent = userData.login;
-                authSection.style.display = 'none';
+                loginButton.querySelector('.login-text').textContent = translations.logoutButton;
                 userInfo.style.display = 'flex';
-                loginButton.querySelector('.login-text').textContent = 
-                    translations[currentLanguage].logoutButton;
+                clientSecretGroup.style.display = 'none';
             }
         } catch (error) {
             console.error('Failed to fetch user data:', error);
-            showError(translations[currentLanguage].error);
+            showMessage(translations.error);
         }
     } else {
-        authSection.style.display = 'block';
+        loginButton.querySelector('.login-text').textContent = translations.loginButton;
         userInfo.style.display = 'none';
-        loginButton.querySelector('.login-text').textContent = 
-            translations[currentLanguage].loginButton;
+        clientSecretGroup.style.display = 'block';
     }
 }
 
-// 显示错误信息
-function showError(message) {
-    const errorElement = document.querySelector('.error-message');
-    errorElement.textContent = message;
-    errorElement.style.display = 'block';
-    setTimeout(() => {
-        errorElement.style.display = 'none';
-    }, 5000);
+function clearSettings() {
+    clientSecret = '';
+    localStorage.removeItem('github_client_secret');
+    authToken = null;
+    localStorage.removeItem('github_token');
+    document.getElementById('clientSecretInput').value = '';
+    updateAuthUI(false);
+    showMessage(translations.clearSettings, 'success');
 }
 
-// 更新API速率限制信息
-function updateRateLimitInfo(response) {
-    const remaining = response.headers.get('X-RateLimit-Remaining');
-    const limit = response.headers.get('X-RateLimit-Limit');
-    if (remaining && limit) {
-        const rateLimitInfo = document.querySelector('.rate-limit-info');
-        rateLimitInfo.textContent = `API Calls: ${remaining}/${limit}`;
-    }
-}
-
-// 获取筛选条件
-function getFilters() {
-    return {
-        language: document.getElementById('languageSelect').value,
-        stars: document.getElementById('starsSelect').value,
-        sort: document.getElementById('sortSelect').value
-    };
-}
-
-// 获取项目
 async function getRandomProjects() {
     const loading = document.querySelector('.loading');
     const container = document.getElementById('projectsContainer');
@@ -278,7 +248,7 @@ async function getRandomProjects() {
     try {
         loading.style.display = 'block';
         container.innerHTML = '';
-        document.querySelector('.error-message').style.display = 'none';
+        document.querySelector('.message').style.display = 'none';
 
         const page = Math.floor(Math.random() * 10) + 1;
         let url = `https://api.github.com/search/repositories?q=stars:>${filters.stars}`;
@@ -287,9 +257,11 @@ async function getRandomProjects() {
             url += `+language:${encodeURIComponent(filters.language)}`;
         }
         
-        url += `&sort=${filters.sort}&order=desc&page=${page}&per_page=10`;
+        url += `&sort=${filters.sort}&order=desc&page=${page}&per_page=12`;
 
-        const headers = {};
+        const headers = {
+            'Accept': 'application/vnd.github.v3+json'
+        };
         if (authToken) {
             headers['Authorization'] = `token ${authToken}`;
         }
@@ -299,9 +271,9 @@ async function getRandomProjects() {
 
         if (!response.ok) {
             if (response.status === 403) {
-                throw new Error(translations[currentLanguage].rateLimitError);
+                throw new Error(translations.rateLimitError);
             }
-            throw new Error(translations[currentLanguage].error);
+            throw new Error(translations.error);
         }
 
         const data = await response.json();
@@ -316,44 +288,59 @@ async function getRandomProjects() {
             const card = createProjectCard(project);
             container.appendChild(card);
         });
+
+        if (projects.length === 0) {
+            showMessage('No more projects to show. Try different filters.', 'info');
+        }
     } catch (error) {
         console.error('Error fetching projects:', error);
-        showError(error.message);
+        showMessage(error.message);
     } finally {
         loading.style.display = 'none';
     }
 }
 
-// 创建项目卡片
+function getFilters() {
+    return {
+        language: document.getElementById('languageSelect').value,
+        stars: document.getElementById('starsSelect').value,
+        sort: document.getElementById('sortSelect').value
+    };
+}
+
+function updateRateLimitInfo(response) {
+    const remaining = response.headers.get('X-RateLimit-Remaining');
+    const limit = response.headers.get('X-RateLimit-Limit');
+    if (remaining !== null && limit !== null) {
+        const rateLimitInfo = document.querySelector('.rate-limit-info');
+        rateLimitInfo.textContent = `API: ${remaining}/${limit}`;
+        rateLimitInfo.style.display = 'block';
+    }
+}
+
 function createProjectCard(project) {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
         <h3>
             <a href="${project.html_url}" target="_blank" rel="noopener noreferrer">
-                ${project.name}
+                ${escapeHtml(project.name)}
             </a>
         </h3>
-        <p>${project.description || translations[currentLanguage].noDescription}</p>
+        <p>${escapeHtml(project.description || translations.noDescription)}</p>
         <div class="card-footer">
-            <span title="${translations[currentLanguage].stars}">
-                <svg height="16" viewBox="0 0 16 16" width="16" fill="#586069">
-                    <path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path>
-                </svg>
+            <span class="stat" title="${translations.stars}">
+                <svg height="16" viewBox="0 0 16 16" fill="#586069"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"/></svg>
                 ${project.stargazers_count.toLocaleString()}
             </span>
-            <span title="${translations[currentLanguage].forks}">
-                <svg height="16" viewBox="0 0 16 16" width="16" fill="#586069">
-                    <path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path>
-                </svg>
+            <span class="stat" title="${translations.forks}">
+                <svg height="16" viewBox="0 0 16 16" fill="#586069"><path d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"/></svg>
                 ${project.forks_count.toLocaleString()}
             </span>
             ${project.language ? `
-                <span title="${translations[currentLanguage].language}">
-                    <svg height="16" viewBox="0 0 16 16" width="16" fill="#586069">
-                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8z"></path>
-                    </svg>
-                    ${project.language}
+                <span class="stat language" title="${translations.language}">
+                    <svg height="16" viewBox="0 0 16 16" fill="#586069"><path d="M8 4a4 4 0 100 8 4 4 0 000-8z"/></svg>
+                    ${escapeHtml(project.language)}
                 </span>
             ` : ''}
         </div>
@@ -361,5 +348,4 @@ function createProjectCard(project) {
     return card;
 }
 
-// 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', initializePage);

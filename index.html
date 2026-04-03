@@ -2,272 +2,520 @@
 <html lang="en">
 
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5F6X2KX363"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'G-5F6X2KX363');
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Project Explorer</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --card-bg: #f6f8fa;
+            --border: #d0d7de;
+            --text: #24292f;
+            --text-muted: #57606a;
+            --primary: #0969da;
+            --primary-hover: #0550ae;
+            --green: #1a7f37;
+            --green-hover: #116329;
+            --red: #cf222e;
+            --purple: #8250df;
+            --orange: #9a6700;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0d1117;
+            --card-bg: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-muted: #8b949e;
+            --primary: #58a6ff;
+            --primary-hover: #79c0ff;
+            --green: #3fb950;
+            --green-hover: #56d364;
+            --red: #f85149;
+            --purple: #a371f7;
+            --orange: #d29922;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f6f8fa;
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            min-height: 100vh;
+            line-height: 1.5;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 24px;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
+        header {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 20px;
-            padding-top: 60px;
+            gap: 16px;
+            padding: 16px 0 32px;
         }
 
-        .language-switch {
-            position: absolute;
-            top: 0;
-            right: 0;
+        .logo {
             display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--text);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: var(--primary);
+        }
+
+        :root[data-theme="dark"] h1 {
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
             gap: 10px;
-            align-items: center;
+            padding: 6px 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
         }
 
-        .github-link {
-            display: flex;
-            align-items: center;
-            padding: 4px;
-            border-radius: 6px;
-            transition: transform 0.2s;
+        .user-info img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
         }
 
-        .github-link:hover {
-            transform: scale(1.1);
-        }
-
-        .language-btn {
-            background: none;
-            border: 1px solid #d1d5da;
-            padding: 5px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .language-btn.active {
-            background-color: #0366d6;
-            color: white;
-            border-color: #0366d6;
-        }
-
-        .auth-section {
-            text-align: center;
-            margin-bottom: 20px;
+        .user-info span {
+            font-size: 14px;
+            color: var(--text-muted);
         }
 
         .github-login-btn {
-            background-color: #24292e;
+            background: linear-gradient(135deg, #238636, #2ea043);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.2s ease;
         }
 
         .github-login-btn:hover {
-            background-color: #2c974b;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(46, 160, 67, 0.3);
+        }
+
+        .github-login-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 18px;
+            color: var(--text);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary);
+        }
+
+        .theme-toggle::after {
+            content: '☀';
+        }
+
+        :root[data-theme="dark"] .theme-toggle::after {
+            content: '☾';
+        }
+
+        [data-theme="light"] h1 {
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .message {
+            display: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.error {
+            background: rgba(248, 81, 73, 0.15);
+            border: 1px solid var(--red);
+            color: var(--red);
+        }
+
+        .message.success {
+            background: rgba(63, 185, 80, 0.15);
+            border: 1px solid var(--green);
+            color: var(--green);
+        }
+
+        .message.info {
+            background: rgba(88, 166, 255, 0.15);
+            border: 1px solid var(--primary);
+            color: var(--primary);
         }
 
         .filters {
-            background-color: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            margin-bottom: 24px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .filter-group {
-            margin-bottom: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
         }
 
         .filter-group label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .filter-group select,
         .filter-group input {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #d1d5da;
-            border-radius: 6px;
-            background-color: white;
+            padding: 10px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .filter-group select {
+            cursor: pointer;
+        }
+
+        .filter-group.client-secret-group {
+            grid-column: 1 / -1;
+        }
+
+        .client-secret-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .client-secret-hint a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .client-secret-hint a:hover {
+            text-decoration: underline;
         }
 
         .refresh-btn {
-            background-color: #2ea44f;
+            background: linear-gradient(135deg, var(--primary), var(--purple));
             color: white;
             border: none;
             padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
             width: 100%;
-            margin-top: 10px;
+            height: 100%;
+            min-height: 42px;
         }
 
         .refresh-btn:hover {
-            background-color: #2c974b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(88, 166, 255, 0.3);
+        }
+
+        .refresh-btn:active {
+            transform: translateY(0);
+        }
+
+        .clear-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .clear-btn:hover {
+            color: var(--red);
+            border-color: var(--red);
         }
 
         .cards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
         }
 
         .card {
-            background-color: white;
-            border-radius: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-            transition: transform 0.2s;
+            transition: all 0.2s ease;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .card:hover {
+            border-color: var(--primary);
             transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         }
 
         .card h3 {
-            margin: 0 0 10px 0;
-            font-size: 18px;
+            margin: 0 0 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card h3 a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .card h3 a:hover {
+            color: var(--primary-hover);
         }
 
         .card p {
-            margin: 0 0 15px 0;
-            color: #586069;
-            font-size: 14px;
-            line-height: 1.5;
+            margin: 0 0 16px;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .card-footer {
             display: flex;
             align-items: center;
-            gap: 15px;
-            font-size: 14px;
-            color: #586069;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
-        .card-footer span {
+        .card-footer .stat {
             display: flex;
             align-items: center;
             gap: 4px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-footer .stat svg {
+            opacity: 0.7;
+        }
+
+        .card-footer .language {
+            background: rgba(88, 166, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
         }
 
         .loading {
+            display: none;
             text-align: center;
-            font-size: 18px;
-            color: #586069;
-            margin-top: 30px;
-            display: none;
+            padding: 40px;
         }
 
-        .user-info {
-            display: none;
-            text-align: right;
-            margin-bottom: 20px;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .user-info img {
-            width: 32px;
-            height: 32px;
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
             border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
         }
 
-        .error-message {
-            color: #cb2431;
-            text-align: center;
-            margin: 20px 0;
-            display: none;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            margin-top: 12px;
+            color: var(--text-muted);
+            font-size: 14px;
         }
 
         .rate-limit-info {
+            display: none;
             text-align: right;
             font-size: 12px;
-            color: #586069;
-            margin-top: 10px;
+            color: var(--text-muted);
+            margin-top: 16px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 32px;
+            color: var(--text-muted);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+            margin-top: 32px;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .filters {
+                padding: 16px;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="language-switch">
-        <button class="language-btn active" data-lang="en">English</button>
-        <button class="language-btn" data-lang="zh">中文</button>
-        <a href="https://github.com/teddyxiong53" class="github-link" target="_blank">
-            <svg height="32" viewBox="0 0 16 16" width="32" fill="#24292e">
-                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
-            </svg>
-        </a>
-    </div>
-
     <div class="container">
-        <!-- <div class="auth-section">
-            <button class="github-login-btn" onclick="handleLogin()">
-                <svg height="20" viewBox="0 0 16 16" width="20" fill="white">
-                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+        <header>
+            <div class="logo">
+                <svg viewBox="0 0 16 16">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
                 </svg>
-                <span class="login-text">Sign in with GitHub</span>
-            </button>
-        </div> -->
+                <h1 class="title">GitHub Project Explorer</h1>
+            </div>
+            <div class="header-right">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+                <div class="user-info">
+                    <img id="userAvatar" src="" alt="Avatar">
+                    <span id="userName"></span>
+                </div>
+                <button class="github-login-btn" onclick="handleLogin()">
+                    <svg viewBox="0 0 16 16" fill="white">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    <span class="login-text">Sign in with GitHub</span>
+                </button>
+            </div>
+        </header>
 
-        <div class="user-info">
-            <span class="rate-limit-info"></span>
-            <img id="userAvatar" src="" alt="User avatar">
-            <span id="userName"></span>
-        </div>
-
-        <div class="header">
-            <h1 class="title">GitHub Project Explorer</h1>
-        </div>
+        <div class="message"></div>
 
         <div class="filters">
             <div class="filter-group">
-                <label class="language-label" for="languageSelect">Programming Language:</label>
+                <label class="language-label">Programming Language:</label>
                 <select id="languageSelect">
                     <option value="">All Languages</option>
                 </select>
             </div>
 
             <div class="filter-group">
-                <label class="stars-label" for="starsSelect">Minimum Stars:</label>
+                <label class="stars-label">Minimum Stars:</label>
                 <select id="starsSelect">
                     <option value="100">100+</option>
                     <option value="1000">1,000+</option>
@@ -278,7 +526,7 @@
             </div>
 
             <div class="filter-group">
-                <label class="sort-label" for="sortSelect">Sort By:</label>
+                <label class="sort-label">Sort By:</label>
                 <select id="sortSelect">
                     <option value="stars">Stars</option>
                     <option value="updated" selected>Recently Updated</option>
@@ -286,19 +534,38 @@
                 </select>
             </div>
 
+            <div class="filter-group" style="display: flex; align-items: flex-end;">
+                <button class="refresh-btn" onclick="getRandomProjects()">Explore Projects</button>
+            </div>
+
+            <div class="filter-group client-secret-group">
+                <label>GitHub OAuth Client Secret (optional):</label>
+                <input type="password" id="clientSecretInput" placeholder="Your OAuth client_secret for higher rate limit">
+                <div class="client-secret-hint">
+                    Get your client_secret from <a href="https://github.com/settings/developers" target="_blank">GitHub Developer Settings</a>. 
+                    Signing in with client_secret increases your API rate limit from 60 to 5000 requests/hour.
+                </div>
+            </div>
+
             <div class="filter-group">
-                <button class="refresh-btn" onclick="getRandomProjects()">Refresh</button>
+                <button class="clear-btn" onclick="clearSettings()">Clear Settings</button>
             </div>
         </div>
 
-        <div class="error-message"></div>
-        <div class="loading">Loading...</div>
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Finding interesting projects...</div>
+        </div>
+        
+        <div class="rate-limit-info"></div>
         <div id="projectsContainer" class="cards-container"></div>
 
+        <footer>
+            Built with GitHub API. Deployed on <a href="https://pages.github.com" target="_blank">GitHub Pages</a>.
+        </footer>
     </div>
 
     <script src="app.js"></script>
-
 </body>
 
 </html>

@@ -1,0 +1,13 @@
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.bak
+.env
+.env.local
+node_modules/
+dist/
+build/
+.cache/
+.playwright-mcp/

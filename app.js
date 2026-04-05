@@ -17,30 +17,11 @@ const languages = [
     'Shell', 'PowerShell', 'Vim script', 'Emacs Lisp',
     'HTML', 'CSS', 'SCSS', 'Sass', 'Less',
     'Vue', 'React', 'Angular', 'Svelte', 'Solid',
-    'Node.js', 'Deno', 'Bun', 'NestJS', 'Express',
-    'FastAPI', 'Django', 'Flask', 'Spring', 'Rails',
-    'Laravel', 'WordPress', 'Ghost', 'Hexo', 'Jekyll',
-    'TensorFlow', 'PyTorch', 'Keras', 'OpenCV', 'Pillow',
-    'NumPy', 'Pandas', 'SciPy', 'Matplotlib', 'Plotly',
-    'Unity', 'Unreal', 'Godot', 'Three.js', 'Babylon.js',
-    'React Native', 'Flutter', 'Ionic', 'Cordova', 'Xamarin',
-    'Electron', 'Tauri', 'NW.js', 'Atom', 'VS Code',
-    'Kubernetes', 'Docker', 'Terraform', 'Ansible', 'Puppet',
-    'Prometheus', 'Grafana', 'ELK', 'Redis', 'MongoDB',
-    'PostgreSQL', 'MySQL', 'SQLite', 'MariaDB', 'Oracle',
-    'GraphQL', 'gRPC', 'gRPC-Web', 'Apache Kafka', 'RabbitMQ',
-    'Nginx', 'Apache', 'Caddy', 'Traefik', 'HAProxy',
-    'AWS', 'GCP', 'Azure', 'DigitalOcean', 'Heroku',
-    'Vim', 'Emacs', 'VS Code', 'IntelliJ', 'PyCharm',
-    'WebAssembly', 'Wasm', 'Rust', 'Zig', 'Nim', 'V',
-    'Assembly', 'LLVM', 'GCC', 'Clang', 'CMake',
-    'Make', 'Gradle', 'Maven', 'NPM', 'Yarn',
-    'Pip', 'Cargo', 'Go modules', 'NuGet', 'Composer',
-    'APT', 'DNF', 'Homebrew', 'Chocolatey', 'Scoop',
-    'Git', 'Mercurial', 'SVN', 'Perforce', 'Fossil',
-    'GitHub', 'GitLab', 'Bitbucket', 'Gitea', 'Gogs',
-    'CircleCI', 'Travis CI', 'Jenkins', 'GitHub Actions',
-    'GitLab CI', 'Drone', 'Argo CD', 'Flux', 'Tekton'
+    'Objective-C', 'F#', 'OCaml', 'Clojure', 'Groovy',
+    'Pascal', 'Delphi', 'Assembly', 'Fortran', 'COBOL',
+    'Basic', 'Prolog', 'Scheme', 'Lisp', 'Racket',
+    'Nim', 'Crystal', 'V', 'Zig', 'D', 'Ada',
+    'Verilog', 'VHDL', 'SystemVerilog', 'Tcl', 'Makefile'
 ];
 
 const translations = {
@@ -123,18 +104,23 @@ function updateUIText() {
 }
 
 function handleLogin() {
-    const clientSecretInput = document.getElementById('clientSecretInput').value.trim();
-    if (clientSecretInput) {
-        clientSecret = clientSecretInput;
-        localStorage.setItem('github_client_secret', clientSecret);
-        showMessage(translations.settingsSaved, 'success');
-    }
+    const loginButton = document.querySelector('.github-login-btn');
+    const loginText = loginButton.querySelector('.login-text');
     
     if (authToken) {
         authToken = null;
         localStorage.removeItem('github_token');
         updateAuthUI(false);
         return;
+    }
+
+    loginText.textContent = 'Authorizing...';
+    loginButton.disabled = true;
+    
+    const clientSecretInput = document.getElementById('clientSecretInput').value.trim();
+    if (clientSecretInput) {
+        clientSecret = clientSecretInput;
+        localStorage.setItem('github_client_secret', clientSecret);
     }
 
     const authUrl = `https://github.com/login/oauth/authorize?client_id=${config.client_id}&redirect_uri=${encodeURIComponent(config.redirect_uri)}&scope=${config.scope}`;
@@ -199,6 +185,8 @@ async function updateAuthUI(isAuthenticated) {
     const userInfo = document.querySelector('.user-info');
     const clientSecretGroup = document.querySelector('.client-secret-group');
 
+    loginButton.disabled = false;
+
     if (clientSecret) {
         document.getElementById('clientSecretInput').value = clientSecret;
     }
@@ -225,6 +213,7 @@ async function updateAuthUI(isAuthenticated) {
         }
     } else {
         loginButton.querySelector('.login-text').textContent = translations.loginButton;
+        loginButton.disabled = false;
         userInfo.style.display = 'none';
         clientSecretGroup.style.display = 'block';
     }

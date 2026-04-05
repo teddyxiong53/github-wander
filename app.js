@@ -1,6 +1,6 @@
 const config = {
     client_id: 'Ov23lidVEwyOPpzljyVm',
-    redirect_uri: window.location.href.split('?')[0],
+    redirect_uri: window.location.origin + window.location.pathname.replace(/\/$/, ''),
     scope: 'read:user'
 };
 
@@ -26,7 +26,7 @@ const languages = [
 
 const translations = {
     title: 'GitHub Project Explorer',
-    refresh: 'Refresh',
+    refresh: 'Explore Projects',
     loading: 'Loading...',
     noDescription: 'No description available',
     languageLabel: 'Programming Language:',
